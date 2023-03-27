@@ -23,4 +23,16 @@ urlpatterns = [
     path('login',views.login),
     # 02注册
     path('sign',views.sign),
+
+    # 03匀色
+    path('rioHist', views.rioHist),
+    # 04拼接
+    path('rasterMosaic', views.rasterMosaic),
+    # 05掩膜裁剪
+    path('maskCrop', views.maskCrop),
+    # 06重投影
+    path('projection', views.projection),
+
+
+
 ]
