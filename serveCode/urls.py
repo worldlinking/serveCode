@@ -19,20 +19,30 @@ from mysite import views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    # 用户功能
     # 01登录
     path('login',views.login),
     # 02注册
     path('sign',views.sign),
+    # 03获取所有影像数据
+    path('getAllDataset', views.getAllDataset),
+    # 04修改用户个人信息
+    path('updateUserById', views.updateUserById),
 
-    # 03匀色
+    # 遥感处理功能
+    # 01匀色
     path('rioHist', views.rioHist),
-    # 04拼接
+    # 02拼接
     path('rasterMosaic', views.rasterMosaic),
-    # 05掩膜裁剪
+    # 03掩膜裁剪
     path('maskCrop', views.maskCrop),
-    # 06重投影
+    # 04重投影
     path('projection', views.projection),
 
-
+    #管理员功能
+    #01获取所有用户
+    path('getAllUsers', views.getAllUsers),
+    #02删除用户
+    path('deleteUserById', views.deleteUserById),
 
 ]

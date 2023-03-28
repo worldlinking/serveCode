@@ -8,6 +8,7 @@ from osgeo import osr, gdal
 from mysite.utils.RasterMosaic import RasterMosaic
 from mysite.utils.mask_crop import mask_crop
 from mysite.utils.rio_hist_test import test_hist_cli
+from django.core import serializers
 
 
 # Create your views here.
@@ -31,6 +32,7 @@ def login(req):
                 result["info"] = '密码错误'
                 return JsonResponse(result, safe=False, content_type='application/json')
             else:
+                # result["data"]=
                 return JsonResponse(result, safe=False, content_type='application/json')
         else:
             result["code"] = 500
@@ -191,3 +193,90 @@ def projection(req):
         result["code"] = 500
         result["info"] = 'failed'
         return JsonResponse(result, safe=False, content_type='application/json')
+
+
+def getAllDataset(req):
+    result = {
+        "code": 200,
+        "info": "success",
+        "data": []
+    }
+    try:
+        user_id = req.GET.get('user_id')
+        path = 'mysite/dataset/'
+        files = os.listdir(path)
+        tif_list = []
+        for file in files:
+            if file.endswith("tif"):
+                tif_list.append({"name": file, "path": path + file})
+        result["data"] = tif_list
+        return JsonResponse(result, safe=False, content_type='application/json')
+    except Exception as e:
+        print(e)
+        result["code"] = 500
+        result["info"] = 'failed'
+        return JsonResponse(result, safe=False, content_type='application/json')
+
+
+def getAllUsers(req):
+    result = {
+        "code": 200,
+        "info": "success",
+        "data": []
+    }
+    try:
+
+        users = User.objects.filter(type=1)
+        users = serializers.serialize('json', users)
+        users = json.loads(users)
+        tempList = []
+        for user in users:
+            user['fields']['id'] = user['pk']
+            tempList.append(user['fields'])
+        result['data'] = tempList
+        return JsonResponse(result, safe=False, content_type='application/json')
+    except Exception as e:
+        print(e)
+        result["code"] = 500
+        result["info"] = 'failed'
+        return JsonResponse(result, safe=False, content_type='application/json')
+
+
+def deleteUserById(req):
+    result = {
+        "code": 200,
+        "info": "success",
+        "data": []
+    }
+    try:
+        user_id = req.GET.get('user_id')
+        print(user_id)
+        users = User.objects.filter(id=user_id)
+        print(users)
+        users.delete()
+        return JsonResponse(result, safe=False, content_type='application/json')
+    except Exception as e:
+        print(e)
+        result["code"] = 500
+        result["info"] = 'failed'
+        return JsonResponse(result, safe=False, content_type='application/json')
+
+
+def updateUserById(req):
+    result = {
+        "code": 200,
+        "info": "success",
+        "data": []
+    }
+    try:
+        user_id = req.GET.get('user_id')
+        pwd = req.GET.get('pwd')
+        email = req.GET.get('email')
+        User.objects.filter(id=user_id).update(pwd=pwd, email=email)
+        return JsonResponse(result, safe=False, content_type='application/json')
+    except Exception as e:
+        print(e)
+        result["code"] = 500
+        result["info"] = 'failed'
+        return JsonResponse(result, safe=False, content_type='application/json')
+
