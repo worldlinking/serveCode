@@ -38,6 +38,8 @@ urlpatterns = [
     path('maskCrop', views.maskCrop),
     # 04重投影
     path('projection', views.projection),
+    # 05展示unet语义分割结果
+    path('showUnetImage', views.showUnetImage),
 
     #管理员功能
     #01获取所有用户

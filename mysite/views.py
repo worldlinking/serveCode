@@ -80,18 +80,20 @@ def rioHist(req):
     }
     try:
         post = req.POST
-        input_dataset_id = post.get("input_dataset_id")
-        reference_dataset_id = post.get("reference_dataset_id")
         user_id = post.get("user_id")
-        input_file = 'mysite/dataset/source1.tif'
-        reference_file = 'mysite/dataset/reference1.tif'
-        output_filename = os.path.basename(input_file).split('.')[0] + '_' + os.path.basename(reference_file)
+        input_file = post.get("input_file_path")
+        reference_file = post.get("reference_file_path")
+        # input_file = 'mysite/dataset/source1.tif'
+        # reference_file = 'mysite/dataset/reference1.tif'
+
+        output_filename = os.path.basename(input_file).split('.')[0].title() + \
+                          os.path.basename(reference_file).split('.')[0].title() + '.tif'
 
         user_path = "mysite/processed/user" + user_id
         if not os.path.exists(user_path):
             os.makedirs(user_path)
 
-        output_path = user_path + '/matched-' + output_filename
+        output_path = user_path + '/matched' + output_filename
         test_hist_cli(input_file, reference_file, output_path)
         result['data'] = output_path
         return JsonResponse(result, safe=False, content_type='application/json')
@@ -113,16 +115,20 @@ def maskCrop(req):
         input_dataset_id = post.get("input_dataset_id")
         reference_dataset_id = post.get("reference_dataset_id")
         user_id = post.get("user_id")
-        input_file = 'mysite/dataset/8youyi-dark.tif'
-        shpFile = 'mysite/dataset/yy2022_shp/yy2022.shp'
-        output_filename = os.path.basename(input_file).split('.')[0] + '_' + os.path.basename(shpFile).split('.')[
-            0] + '.tif '
+        input_file = post.get("input_file_path")
+        shpFile = post.get("shpFile_path")
+        # input_file = 'mysite/dataset/8youyidark.tif'
+        # shpFile = 'mysite/dataset/yy2022_shp/yy2022.shp'
+
+        output_filename = os.path.basename(input_file).split('.')[0].title() + \
+                          os.path.basename(shpFile).split('.')[
+                              0].title() + '.tif '
 
         user_path = "mysite/processed/user" + user_id
         if not os.path.exists(user_path):
             os.makedirs(user_path)
 
-        output_path = user_path + '/maskCrop-' + output_filename
+        output_path = user_path + '/maskcrop' + output_filename
         mask_crop(input_file, shpFile, output_path)
         result['data'] = output_path
         return JsonResponse(result, safe=False, content_type='application/json')
@@ -141,18 +147,17 @@ def rasterMosaic(req):
     }
     try:
         post = req.POST
-        input_dataset_id = post.get("input_dataset_id")
-        reference_dataset_id = post.get("reference_dataset_id")
         user_id = post.get("user_id")
-        input_file = 'mysite/dataset/2.tif'
-        reference_file = 'mysite/dataset/3.tif'
-        output_filename = os.path.basename(input_file).split('.')[0] + '_' + os.path.basename(reference_file)
-
+        input_file = post.get("input_file_path")
+        reference_file = post.get("reference_file_path")
+        output_filename = os.path.basename(input_file).split('.')[0].title() + \
+                          os.path.basename(reference_file).split('.')[0].title() + '.tif'
+        print(output_filename)
         user_path = "mysite/processed/user" + user_id
         if not os.path.exists(user_path):
             os.makedirs(user_path)
 
-        output_path = user_path + '/Mosaic-' + output_filename
+        output_path = user_path + '/mosaic' + output_filename
         RasterMosaic(input_file, reference_file, output_path)
         result['data'] = output_path
         return JsonResponse(result, safe=False, content_type='application/json')
@@ -171,22 +176,21 @@ def projection(req):
     }
     try:
         post = req.POST
-        dataset_id = post.get("dataset_id")
         user_id = post.get("user_id")
-        file = 'mysite/dataset/1.tif'
-
+        file = post.get("dataset_path")
         user_path = "mysite/processed/user" + user_id
         if not os.path.exists(user_path):
             os.makedirs(user_path)
 
         if file.endswith("tif"):
-            filename = os.path.basename(file)
+            filename = os.path.basename(file).split('.')[0].title() + '.tif'
+            print(filename)
             srs = osr.SpatialReference()
             srs.SetWellKnownGeogCS('WGS84')
             old_ds = gdal.Open(file)
             vrt_ds = gdal.AutoCreateWarpedVRT(old_ds, None, srs.ExportToWkt(), gdal.GRA_Bilinear)
-            gdal.GetDriverByName('gtiff').CreateCopy(user_path + '/projection-' + filename, vrt_ds)
-            result['data'] = "user" + user_id + '/projection-' + filename
+            gdal.GetDriverByName('gtiff').CreateCopy(user_path + '/projection' + filename, vrt_ds)
+            result['data'] = "user" + user_id + '/projection' + filename
             return JsonResponse(result, safe=False, content_type='application/json')
     except Exception as e:
         print(e)
@@ -250,9 +254,7 @@ def deleteUserById(req):
     }
     try:
         user_id = req.GET.get('user_id')
-        print(user_id)
         users = User.objects.filter(id=user_id)
-        print(users)
         users.delete()
         return JsonResponse(result, safe=False, content_type='application/json')
     except Exception as e:
@@ -280,3 +282,30 @@ def updateUserById(req):
         result["info"] = 'failed'
         return JsonResponse(result, safe=False, content_type='application/json')
 
+
+def showUnetImage(req):
+    result = {
+        "code": 200,
+        "info": "success",
+        "data": []
+    }
+    try:
+        post = req.POST
+        user_id = post.get("user_id")
+        input_file_dir = post.get("input_file_path")
+        output_filename = 'mosaicUnetResult' + '.tif'
+        user_path = "mysite/processed/user" + user_id
+        if not os.path.exists(user_path):
+            os.makedirs(user_path)
+
+        output_path = user_path + '/' + output_filename
+        img_path = user_path + '/UnetResultImg.png'
+        os.system("python mysite/utils/unet8youyi/mosaicAndShow.py --inputDir {} --destFile {} --img_path {}".
+                  format( input_file_dir , output_path,img_path))
+        result['data'] = output_path
+        return JsonResponse(result, safe=False, content_type='application/json')
+    except Exception as e:
+        print(e)
+        result["code"] = 500
+        result["info"] = 'failed'
+        return JsonResponse(result, safe=False, content_type='application/json')
