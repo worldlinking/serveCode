@@ -95,7 +95,7 @@ def rioHist(req):
 
         output_path = user_path + '/matched' + output_filename
         test_hist_cli(input_file, reference_file, output_path)
-        result['data'] = output_path
+        result['data'] = "user" + user_id + '/matched' + output_filename
         return JsonResponse(result, safe=False, content_type='application/json')
     except Exception as e:
         print(e)
@@ -112,8 +112,6 @@ def maskCrop(req):
     }
     try:
         post = req.POST
-        input_dataset_id = post.get("input_dataset_id")
-        reference_dataset_id = post.get("reference_dataset_id")
         user_id = post.get("user_id")
         input_file = post.get("input_file_path")
         shpFile = post.get("shpFile_path")
@@ -130,7 +128,7 @@ def maskCrop(req):
 
         output_path = user_path + '/maskcrop' + output_filename
         mask_crop(input_file, shpFile, output_path)
-        result['data'] = output_path
+        result['data'] = "user" + user_id + '/maskcrop' + output_filename
         return JsonResponse(result, safe=False, content_type='application/json')
     except Exception as e:
         print(e)
@@ -159,7 +157,7 @@ def rasterMosaic(req):
 
         output_path = user_path + '/mosaic' + output_filename
         RasterMosaic(input_file, reference_file, output_path)
-        result['data'] = output_path
+        result['data'] = "user" + user_id +'/mosaic' + output_filename
         return JsonResponse(result, safe=False, content_type='application/json')
     except Exception as e:
         print(e)
@@ -302,7 +300,7 @@ def showUnetImage(req):
         img_path = user_path + '/UnetResultImg.png'
         os.system("python mysite/utils/unet8youyi/mosaicAndShow.py --inputDir {} --destFile {} --img_path {}".
                   format( input_file_dir , output_path,img_path))
-        result['data'] = output_path
+        result['data'] = "user" + user_id + '/UnetResultImg.png'
         return JsonResponse(result, safe=False, content_type='application/json')
     except Exception as e:
         print(e)
